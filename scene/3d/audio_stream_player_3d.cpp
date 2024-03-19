@@ -420,8 +420,11 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 		}
 
 		Vector3 local_pos = listener_node->get_global_transform().orthonormalized().affine_inverse().xform(global_pos);
-
-		float dist = local_pos.length();
+		float dist = MAX(local_pos.length() - min_distance, 0.0f);
+		if (min_distance > 0) {
+			local_pos.normalize();
+			local_pos *= dist;
+		}
 
 		Vector3 area_sound_pos;
 		Vector3 listener_area_pos;
@@ -684,6 +687,16 @@ float AudioStreamPlayer3D::get_max_distance() const {
 	return max_distance;
 }
 
+void AudioStreamPlayer3D::set_min_distance(float p_metres) {
+	ERR_FAIL_COND(p_metres < 0.0);
+	min_distance = p_metres;
+	update_gizmos();
+}
+
+float AudioStreamPlayer3D::get_min_distance() const {
+	return min_distance;
+}
+
 void AudioStreamPlayer3D::set_area_mask(uint32_t p_mask) {
 	area_mask = p_mask;
 }
@@ -853,6 +866,9 @@ void AudioStreamPlayer3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_max_distance", "meters"), &AudioStreamPlayer3D::set_max_distance);
 	ClassDB::bind_method(D_METHOD("get_max_distance"), &AudioStreamPlayer3D::get_max_distance);
 
+	ClassDB::bind_method(D_METHOD("set_min_distance", "meters"), &AudioStreamPlayer3D::set_min_distance);
+	ClassDB::bind_method(D_METHOD("get_min_distance"), &AudioStreamPlayer3D::get_min_distance);
+
 	ClassDB::bind_method(D_METHOD("set_area_mask", "mask"), &AudioStreamPlayer3D::set_area_mask);
 	ClassDB::bind_method(D_METHOD("get_area_mask"), &AudioStreamPlayer3D::get_area_mask);
 
@@ -899,6 +915,7 @@ void AudioStreamPlayer3D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "autoplay"), "set_autoplay", "is_autoplay_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "stream_paused", PROPERTY_HINT_NONE, ""), "set_stream_paused", "get_stream_paused");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_distance", PROPERTY_HINT_RANGE, "0,4096,0.01,or_greater,suffix:m"), "set_max_distance", "get_max_distance");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_distance", PROPERTY_HINT_RANGE, "0,4096,0.01,or_greater,suffix:m"), "set_min_distance", "get_min_distance");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max_polyphony", PROPERTY_HINT_NONE, ""), "set_max_polyphony", "get_max_polyphony");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "panning_strength", PROPERTY_HINT_RANGE, "0,3,0.01,or_greater"), "set_panning_strength", "get_panning_strength");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bus", PROPERTY_HINT_ENUM, ""), "set_bus", "get_bus");

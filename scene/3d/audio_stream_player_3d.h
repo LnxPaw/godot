@@ -111,6 +111,7 @@ private:
 	float linear_attenuation = 0;
 
 	float max_distance = 0.0;
+	float min_distance = 0.0;
 
 	Ref<VelocityTracker3D> velocity_tracker;
 
@@ -159,6 +160,9 @@ public:
 
 	void set_max_distance(float p_metres);
 	float get_max_distance() const;
+
+	void set_min_distance(float p_metres);
+	float get_min_distance() const;
 
 	void set_area_mask(uint32_t p_mask);
 	uint32_t get_area_mask() const;
